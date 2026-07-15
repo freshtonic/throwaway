@@ -1,0 +1,19 @@
+name: git-stack merge-blocked
+
+# Installed by `git stack protect`. Fails a required check while a PR carries the
+# `merge-blocked` label, so a stacked PR cannot be merged before the ones below
+# it. git-stack adds/removes the label on `git stack submit`.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  merge-blocked:
+    name: merge-blocked
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block while the merge-blocked label is present
+        if: contains(github.event.pull_request.labels.*.name, 'merge-blocked')
+        run: |
+          echo "::error::Blocked by git-stack: an earlier PR in the stack must merge first."
+          exit 1
